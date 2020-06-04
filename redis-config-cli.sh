@@ -51,6 +51,44 @@ usage() {
     echo "  -h <help>           Output this help and exit."
 }
 
+create_config_files() {
+   rm -rf ./$file_prefix
+   echo "Creating .conf files"
+   mkdir -p ./$file_prefix/redis/data
+   generate_redis_sentinel_conf
+   generate_redis_slave_conf
+   generate_redis_master_conf
+}
+
+generate_redis_sentinel_conf() {
+    sed \
+        -e "s/\${PREFIX}/${file_prefix}/" \
+        -e "s/\${REDIS_PORT}/${redis_port}/" \
+        -e "s/\${REDIS_MASTER_IP}/${redis_master_ip}/" \
+        -e "s/\${SENTINEL_PORT}/${sentinel_port}/" \
+        ./templates/redis-sentinel.template.conf \
+         > ./$file_prefix/redis-$file_prefix-sentinel-$sentinel_port.conf
+}
+
+generate_redis_slave_conf() {
+    sed \
+        -e "s/\${PREFIX}/${file_prefix}/" \
+        -e "s/\${REDIS_PORT}/${redis_port}/" \
+        -e "s/\${REDIS_MASTER_IP}/${redis_master_ip}/" \
+        ./templates/redis-slave.template.conf \
+         > ./$file_prefix/redis-$file_prefix-slave-$redis_port.conf
+}
+
+
+generate_redis_master_conf() {
+    sed \
+        -e "s/\${PREFIX}/${file_prefix}/" \
+        -e "s/\${REDIS_PORT}/${redis_port}/" \
+        ./templates/redis-master.template.conf \
+         > ./$file_prefix/redis-$file_prefix-master-$redis_port.conf
+}
+
+
 while [ "$1" != "" ]; do
     case $1 in
         -f | --file )            shift
@@ -80,5 +118,5 @@ if [ -z "$redis_master_ip"  ]
 then
     echo "Invalid config params"
 else
-    echo "Creating .conf files"
+   create_config_files
 fi
