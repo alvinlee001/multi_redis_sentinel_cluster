@@ -1,0 +1,4 @@
+redis_master_ip: 127.0.0.1
+file_prefix: HK
+redis_port: 9000
+sentinel_port: 2900
